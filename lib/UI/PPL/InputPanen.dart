@@ -1,17 +1,19 @@
-import 'package:art_sweetalert/art_sweetalert.dart';
+import 'dart:io';
+
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:sobean/Model/errormsg.dart';
 import 'package:sobean/Model/gradeKomoditas.dart';
+import 'package:sobean/Model/panen.dart';
 import 'package:sobean/Model/penjual.dart';
 import 'package:sobean/Service/api.dart';
-import 'package:sobean/UI/PPL/panen.dart';
 
 class InputPanen extends StatefulWidget {
-  // final Panen panen;
-  // InputPanen({required this.panen});
+  final int id;
+  InputPanen({required this.id});
   @override
   _InputPanenState createState() => _InputPanenState();
 }
@@ -21,22 +23,42 @@ class _InputPanenState extends State<InputPanen> {
   bool _validate=false;
   bool _isupdate=false;
   late ErrorMSG response;
-  late bool _success;
+  late bool _success=false;
   late TextEditingController   waktuTanam, tglPerkiraanPanen, jumlahPerkiraanPanen, satuan, tglPanen, jumlahRiilPanen, harga, tglHargaBerlaku;
   final format=DateFormat('yyyy-MM-dd');
   String dropdownSatuan = 'kg';
   late List<GradeKomoditas> _gradeKom=[];
-  late int idGradekomoditas=1;
-  late int idAnggotaTani;
-  late String _status='Y';
+  late List<Penjual> _penjual=[];
+  late int idGradekomoditas=0;
+  late int idAnggotaTani=0;
+  late int _idKomoditasDijual=0;
+  late String _status='N';
+  late String _imagePath="";
+  late String _imageURL="";
+  final ImagePicker _picker = ImagePicker();
   void validasi() async{
     if(_formKey.currentState!.validate()){      
       _formKey.currentState!.save();
+      var params =  {
+          'id_komoditas_dijual':_idKomoditasDijual.toString(),
+          'id_grade_komoditas':idGradekomoditas.toString(),
+          'id_anggota_tani' : idAnggotaTani.toString(),
+          'tgl_perkiraan_panen' :tglPerkiraanPanen.text.toString(),
+          'waktu_tanam' :waktuTanam.text.toString(),
+          'jumlah_perkiraan_panen':jumlahPerkiraanPanen.text.toString(),
+          'satuan' :dropdownSatuan.toString(),
+          'jumlah_riil_panen':jumlahRiilPanen.text.toString(),
+          'tgl_panen':tglPanen.text.toString(),
+          'publish':_status.toString(),
+          'harga':harga.text.toString(),
+          'tgl_harga_berlaku':tglHargaBerlaku.text.toString(),
+        }; 
       if(_isupdate){
+        //print('update');
         //update
       }else{
         //simpan
-        //print('ssss');
+        //print('simpan');
         // print(_panen);
         // _panen.idGradeKomoditas=idGradekomoditas;
         // _panen.idAnggotaTani=idAnggotaTani;
@@ -49,43 +71,20 @@ class _InputPanenState extends State<InputPanen> {
         // _panen.harga=harga.text;
         // _panen.tglHargaBerlaku=tglHargaBerlaku.text;
         // _panen.status=_status;
-        var params =  {
-          'id_grade_komoditas':idGradekomoditas.toString(),
-          'id_anggota_tani' : idAnggotaTani.toString(),
-          'tgl_perkiraan_panen' :tglPerkiraanPanen.text.toString(),
-          'waktu_tanam' :waktuTanam.text.toString(),
-          'jumlah_perkiraan_panen':jumlahPerkiraanPanen.text.toString(),
-          'satuan' :dropdownSatuan.toString(),
-          'jumlah_riil_panen':jumlahRiilPanen.text.toString(),
-          'tgl_panen':tglPanen.text.toString(),
-          'publish':_status.toString(),
-          'harga':harga.text.toString(),
-          'tgl_harga_berlaku':tglHargaBerlaku.text.toString(),
-        // 'id_grade_komoditas':'1',
-        // 'id_anggota_tani' : '24',
-        // 'tgl_perkiraan_panen' :'2020-12-3',
-        // 'waktu_tanam' :'2020-12-31',
-        //'jumlah_perkiraan_panen':'2222',
-        // 'satuan' :'kg',
-        // 'jumlah_riil_panen':'4444',
-        //'tgl_panen':'2020-12-31',
-        //'status':'Y',
-        // 'harga':'6565',
-        //'tgl_harga_berlaku':'2020-12-31'
-        }; 
-        response=await ApiService.savePanen(params);
-      }
+        
+      }     
+      response=await ApiService.savePanen(params,_idKomoditasDijual, _imagePath);
       _success=response.success;
       final snackBar = SnackBar(
             content: Text(response.message),
-            );
+            );        
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       if (_success) {
         //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PanenPage()));
-        Navigator.pop(context);
+        Navigator.pushNamedAndRemoveUntil(context, "panenppl", (Route<dynamic> route) => false);
       } else {
-        
       }
+      
     }else {
       _validate = true;
     }
@@ -104,6 +103,13 @@ class _InputPanenState extends State<InputPanen> {
         _gradeKom=respose.toList();
         });
   }
+  void getPenjual() async {
+  final respose = await ApiService.searchPenjual('');  
+  print(respose);
+  setState(() {
+        _penjual=respose.toList();
+        });
+  }
   void _handleRadioValueChange1(String value) {
     setState(() {
       _status = value;
@@ -112,16 +118,39 @@ class _InputPanenState extends State<InputPanen> {
   @override
   void initState() {
     // TODO: implement initState
+    
     super.initState();
     getGrade();
-    waktuTanam = TextEditingController();
-    tglPerkiraanPanen= TextEditingController();
-    jumlahPerkiraanPanen= TextEditingController();
-    satuan= TextEditingController();
-    tglPanen= TextEditingController();
-    jumlahRiilPanen= TextEditingController();
-    harga= TextEditingController();
-    tglHargaBerlaku= TextEditingController();
+    getPenjual();
+      waktuTanam = TextEditingController();
+      tglPerkiraanPanen= TextEditingController();
+      jumlahPerkiraanPanen= TextEditingController();
+      satuan= TextEditingController();
+      tglPanen= TextEditingController();
+      jumlahRiilPanen= TextEditingController();
+      harga= TextEditingController();
+      tglHargaBerlaku= TextEditingController();
+    if(widget.id != 0){      
+       ApiService.detailPanen(widget.id).then((Panen result){
+         _isupdate=true;
+        _idKomoditasDijual=result.idKomoditasDijual.toInt();
+        idAnggotaTani=result.idAnggotaTani.toInt();
+        idGradekomoditas=result.idGradeKomoditas.toInt();
+        waktuTanam = TextEditingController(text:result.waktuTanam);
+        tglPerkiraanPanen= TextEditingController(text:result.tglPerkiraanPanen);
+        jumlahPerkiraanPanen= TextEditingController(text:result.jumlahPerkiraanPanen);
+        satuan= TextEditingController(text:result.satuan);
+        tglPanen= TextEditingController(text:result.tglPanen);
+        jumlahRiilPanen= TextEditingController(text:result.jumlahRiilPanen);
+        harga= TextEditingController(text:result.harga);
+        tglHargaBerlaku= TextEditingController(text:result.tglHargaBerlaku);
+        _status=result.publish.toString();
+        _imageURL=result.foto;
+        setState(() {});
+       });
+    }
+      
+    
   }
   @override
   Widget build(BuildContext context) {
@@ -132,7 +161,7 @@ class _InputPanenState extends State<InputPanen> {
           ),
         body: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(15),
             color: Colors.white,
             child: Form(
               autovalidate: _validate,
@@ -142,12 +171,12 @@ class _InputPanenState extends State<InputPanen> {
                   Padding(
                     padding: const EdgeInsets.all(5),
                     child: DropdownButtonFormField(
-                      hint: Text("Select Province"),
-                      value: idGradekomoditas,
+                      hint: Text("Pilih Komoditas"),                      
+                      value: idGradekomoditas==0?null:idGradekomoditas,
                       decoration: const InputDecoration(
                         icon: Icon(Icons.category_rounded),
-                        hintText: 'Jeruk Bali',
-                        labelText: 'Jenis Komoditas *',
+                        //hintText: 'Jeruk Bali',
+                        //labelText: 'Jenis Komoditas *',
                       ),
                       items: _gradeKom.map((item) {
                         return DropdownMenuItem(
@@ -164,40 +193,64 @@ class _InputPanenState extends State<InputPanen> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(5),
-                    child: DropdownSearch<Penjual>(
-                    label: "Petani *",
-                    showSearchBox: true,
-                    isFilteredOnline: true,
-                    autoValidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (u) => u == null ? "Wajib Diisi " : null,
-                    dropdownSearchDecoration: InputDecoration(
-                      contentPadding: EdgeInsets.all(0),
-                        icon: Icon(Icons.supervised_user_circle_sharp),
+                    padding: const EdgeInsets.all(5),
+                    child: DropdownButtonFormField(
+                      hint: Text("Pilih Penjual"),
+                      value: idAnggotaTani==0?null:idAnggotaTani,
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.category_rounded),
+                        //hintText: 'Petani',
+                        //labelText: 'Nama Petani *',
                       ),
-                    onFind: (String filter) =>ApiService.searchPenjual(filter),
-                    dropdownBuilder: _customDropDownExample,
-                    popupItemBuilder: (context, item, index)  {
-                      if (item == null) {
-                        return Container();
-                      }
-                      return Container(
-                        child:  ListTile(
-                                contentPadding: EdgeInsets.only(left: 10,right: 10),
-                                title: Text(item.nama),
-                                subtitle: Text(
-                                  item.namaKelompok,
-                                ),
-                              ),
-                      );
-                    },
-                    onChanged: (u) {                      
+                      items: _penjual.map((item) {
+                        return DropdownMenuItem(
+                          child: Text(item.nama),
+                          value: item.idAnggotaTani.toInt(),
+                        );
+                      }).toList(),
+                      onChanged: (value) {                      
                         setState(() {
-                          idAnggotaTani=u!.idAnggotaTani;
+                          idAnggotaTani=value as int;
                         });
-                      }
+                      },
+                      validator: (u) => u == null ? "Wajib Diisi " : null,
+                    ),
                   ),
-                  ),
+                  // Padding(
+                  //   padding: EdgeInsets.all(5),
+                  //   child: DropdownSearch<Penjual>(
+                  //   label: "Petani *",
+                  //   showSearchBox: false,
+                  //   isFilteredOnline: true,
+                  //   autoValidateMode: AutovalidateMode.onUserInteraction,
+                  //   validator: (u) => u == null ? "Wajib Diisi " : null,
+                  //   dropdownSearchDecoration: InputDecoration(
+                  //     contentPadding: EdgeInsets.all(0),
+                  //       icon: Icon(Icons.supervised_user_circle_sharp),
+                  //     ),
+                  //   onFind: (String filter) =>ApiService.searchPenjual(filter),
+                  //   dropdownBuilder: _customDropDownExample,
+                  //   popupItemBuilder: (context, item, index)  {
+                  //     if (item == null) {
+                  //       return Container();
+                  //     }
+                  //     return Container(
+                  //       child:  ListTile(
+                  //               contentPadding: EdgeInsets.only(left: 10,right: 10),
+                  //               title: Text(item.nama),
+                  //               subtitle: Text(
+                  //                 item.namaKelompok,
+                  //               ),
+                  //             ),
+                  //     );
+                  //   },
+                  //   onChanged: (u) {                      
+                  //       setState(() {
+                  //         idAnggotaTani=u!.idAnggotaTani;
+                  //       });
+                  //     }
+                  // ),
+                  // ),
                   Divider(),
                   Padding(
                     padding: const EdgeInsets.all(5),
@@ -374,7 +427,7 @@ class _InputPanenState extends State<InputPanen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(bottom: 10),
+                  padding: EdgeInsets.only(bottom: 10, left: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -410,6 +463,62 @@ class _InputPanenState extends State<InputPanen> {
                     ],
                   ),
                 ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10, left: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(Icons.image),
+                      Flexible(
+                      child: _imagePath != '' ? GestureDetector(
+                            child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(File(_imagePath),
+                          fit: BoxFit.fitWidth,
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height / 5,
+                        ),
+                      ),
+                      onTap: () {
+                          getImage(ImageSource.gallery);
+                        }
+                      ) : _imageURL != '' ? GestureDetector(
+                            child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(_imageURL,
+                          fit: BoxFit.fitWidth,
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height / 5,
+                        ),
+                      ),
+                      onTap: () {
+                          getImage(ImageSource.gallery);
+                        }
+                      ) : GestureDetector(
+                        onTap: () {
+                          getImage(ImageSource.gallery);
+                        },
+                        child: Container(
+                          height: 100,
+                          child: Row(
+                            children: <Widget>[
+                               Padding(
+                                padding: EdgeInsets.only(left: 25),
+                              ),
+                              Text("Ambil Gambar")
+                            ],
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Colors.greenAccent, width: 1))
+                          ),
+                        ),
+                      )
+                          
+                    )
+                    ],
+                  ),
+
+                ),
                 Divider(),
                 Container(
                     width: MediaQuery.of(context).size.width,
@@ -435,8 +544,16 @@ class _InputPanenState extends State<InputPanen> {
               ),
               ),
           ),
-        ),
+        ),  
     );
+  }
+  Future getImage(ImageSource media) async {
+    var img = await _picker.pickImage(source: media);
+    //final pickedImageFile = File(img!.path);
+    setState(() {
+      _imagePath=img!.path;
+      print(_imagePath);
+    });
   }
 }
  Widget _customDropDownExample(

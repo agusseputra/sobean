@@ -51,7 +51,7 @@ class Penjual {
         idDesa: json["id_desa"] == null ? 0 : json["id_desa"] as int,
         namaKelompok: json["nama_kelompok"]  == null ? '' : json["nama_kelompok"] as String,
         namaDesa: json["nama_desa"]  == null ? '' : json["nama_desa"] as String,
-        foto: json["foto"]  == null ? 'https://png.pngtree.com/png-vector/20190704/ourlarge/pngtree-businessman-user-avatar-free-vector-png-image_1538405.jpg' : json["foto"] as String,
+        foto: json["foto"]  == null ? 'https://png.pngtree.com/png-vector/20190704/ourlarge/pngtree-businessman-user-avatar-free-vector-png-image_1538405.jpg' : "http://192.168.100.128/siprotani/files/petani/"+json["foto"] as String,
     );
     static List<Penjual> fromJsonList(List list) {
     return list.map((item) => Penjual.fromJson(item)).toList();

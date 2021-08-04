@@ -1,33 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:intl/intl.dart';
 import 'package:sobean/Model/panen.dart';
 import 'package:sobean/Service/api.dart';
 import 'package:sobean/UI/PPL/InputPanen.dart';
+import 'package:sobean/UI/widget/bottombar.dart';
+import 'package:sobean/UI/widget/drawer.dart';
 
 class PanenPage extends StatefulWidget {
+  static var routeName="panenppl";
   @override
   _PanenPageState createState() => _PanenPageState();
 }
 
 class _PanenPageState extends State<PanenPage> {
-  
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextStyle dropdownMenuItem = TextStyle(color: Colors.black, fontSize: 18);
   final primary = Color(0xff696b9e);
   final secondary = Color(0xfff29a94);
   static const _pageSize = 6;
-  final PagingController<int, Panen> _pagingController = PagingController(firstPageKey: 0);
+  final PagingController<int, PanenList> _pagingController = PagingController(firstPageKey: 0);
   late TextEditingController   _s;
+  late String _publish="N";
+  var f = NumberFormat("###.0#", "en_US");
    @override
   void initState() {
     _s=TextEditingController();
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey, _s.text);
+      _fetchPage(pageKey, _s.text,_publish);
     });    
     super.initState();
   }
-  Future<void> _fetchPage(int pageKey, _s) async {
+  Future<void> _fetchPage(int pageKey, _s,_publish) async {
     try {
-      final newItems = await ApiService.getPanen(pageKey, _s);
+      final newItems = await ApiService.getPanenPPL(pageKey, _s,_publish);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -39,20 +45,28 @@ class _PanenPageState extends State<PanenPage> {
       _pagingController.error = error;
     }
   }
-
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+   // The app's "state".
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Color(0xfff0f0f0),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         backgroundColor: Colors.green,
         onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: 0,)));
         },
       ),
+      bottomNavigationBar: buildBottomBar(1,1,2, context),
+      drawer: drawerBar(context),
       body: SingleChildScrollView(
         child: Container(
+          padding: EdgeInsets.only(bottom: 80),
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
           child: Stack(
@@ -65,92 +79,116 @@ class _PanenPageState extends State<PanenPage> {
                   onRefresh: ()=>Future.sync(
                     ()=>_pagingController.refresh()
                   ),
-                  child: PagedListView<int, Panen>(
+                  child: PagedListView<int, PanenList>(
                   pagingController: _pagingController,
-                  builderDelegate: PagedChildBuilderDelegate<Panen>(
+                  builderDelegate: PagedChildBuilderDelegate<PanenList>(
                     itemBuilder: (context, item, index) => Container(
-                      child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.white,
-                      ),
-                      width: double.infinity,
-                      height: 90,
-                      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Column(
-                            children: [
-                              Container(
-                                width: 50,
-                                height: 50,
-                                margin: EdgeInsets.only(right: 15),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  border: Border.all(width: 3, color: secondary),
-                                  image: DecorationImage(
-                                      image: NetworkImage(item.foto),
-                                      fit: BoxFit.fill),
-                                ),
+                      child: GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: item.idKomoditasDijual,)));
+                        },
+                        child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          border: Border.all(width: 1, color: item.publish=='Y'?Colors.white:Colors.orange)
+                        ),
+                        width: double.infinity,
+                        height: 110,
+                        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                        child: Column(
+                            children:[ Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Column(
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 50,
+                                    margin: EdgeInsets.only(right: 15),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      border: Border.all(width: 3, color: secondary),
+                                      image: DecorationImage(
+                                          image: NetworkImage(item.foto),
+                                          fit: BoxFit.fill),
+                                    ),
+                                  ),
+                                  Text( f.format(double.parse(item.jumlahPerkiraanPanen))+' '+item.satuan, style: TextStyle(fontSize: 12),textAlign: TextAlign.left)
+                                ],
                               ),
-                              Text(item.jumlahPerkiraanPanen+' '+item.satuan, style: TextStyle(fontSize: 12),textAlign: TextAlign.left)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      item.namaGrade,
+                                      style: TextStyle(
+                                          color: primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                    ),
+                                    SizedBox(
+                                      height: 6,
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.supervised_user_circle,
+                                          color: secondary,
+                                          size: 15,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(item.nama,
+                                            style: TextStyle(
+                                                color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.location_on,
+                                          color: secondary,
+                                          size: 15,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(item.namaKelompok+', '+item.namaDesa,
+                                            style: TextStyle(
+                                                color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
                             ],
                           ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  item.namaGrade,
+                          Divider(
+                            height: 7,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.date_range_rounded,
+                                color: secondary,
+                                size: 15,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text("Perkiraan Panen "+item.tglPerkiraanPanen,
                                   style: TextStyle(
-                                      color: primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                                SizedBox(
-                                  height: 6,
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.date_range_rounded,
-                                      color: secondary,
-                                      size: 15,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(item.tglPerkiraanPanen,
-                                        style: TextStyle(
-                                            color: primary, fontSize: 12, letterSpacing: .3)),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 6,
-                                ),
-                                Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.location_on,
-                                      color: secondary,
-                                      size: 15,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Text(item.nama+', '+item.namaKelompok,
-                                        style: TextStyle(
-                                            color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    )
+                                      color: secondary, fontSize: 10, letterSpacing: .3, fontStyle: FontStyle.italic)),
+                            ],
+                          ),
+                        ]
+                        ),
+                    ),
+                      )
                         
                       
                     ),
@@ -172,23 +210,34 @@ class _PanenPageState extends State<PanenPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () => _scaffoldKey.currentState!.openDrawer(),
                         icon: Icon(
                           Icons.menu,
                           color: Colors.white,
                         ),
                       ),
                       Text(
-                        "Produk Pertanian",
+                        "Hasil Panen Petani",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      IconButton(
-                        onPressed: () {},
+                      PopupMenuButton(
                         icon: Icon(
                           Icons.filter_list,
                           color: Colors.white,
                         ),
-                      ),
+                        initialValue: _publish,
+                        onSelected: (String result) { 
+                            setState(() { 
+                              _publish = result; 
+                              _pagingController.refresh();
+                            }); 
+                          },
+                        itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                          new PopupMenuItem<String>(child: const Text('Publish'),value: 'Y'),
+                          new PopupMenuItem<String>(child: const Text('Draft'),value: 'N'),
+                          new PopupMenuItem<String>(child: const Text('Semua'),value: 'All'),
+                        ],
+                      )
                     ],
                   ),
                 ),

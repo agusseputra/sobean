@@ -1,58 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:sobean/Model/penjual.dart';
+import 'package:intl/intl.dart';
+import 'package:sobean/Model/kelompok.dart';
+import 'package:sobean/Model/panen.dart';
 import 'package:sobean/Service/api.dart';
-import 'package:sobean/UI/PPL/inputPenjual.dart';
-import 'package:sobean/UI/PPL/updatePenjual.dart';
-import 'package:sobean/UI/widget/appbar.dart';
+import 'package:sobean/UI/PPL/InputPanen.dart';
 import 'package:sobean/UI/widget/bottombar.dart';
 import 'package:sobean/UI/widget/drawer.dart';
 
-class PenjualPage extends StatefulWidget {
-  static var routeName="penjualppl";
+class KelompokPage extends StatefulWidget {
+  static var routeName="kelompokppl";
   @override
-  _PenjualPageState createState() => _PenjualPageState();
+  _KelompokPage createState() => _KelompokPage();
 }
 
-class _PenjualPageState extends State<PenjualPage> {
+class _KelompokPage extends State<KelompokPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  static const _pageSize = 6;
+  final TextStyle dropdownMenuItem = TextStyle(color: Colors.black, fontSize: 18);
   final primary = Color(0xff696b9e);
   final secondary = Color(0xfff29a94);
+  static const _pageSize = 6;
+  final PagingController<int, Kelompok> _pagingController = PagingController(firstPageKey: 0);
   late TextEditingController   _s;
-  final PagingController<int, Penjual> _pagingController = PagingController(firstPageKey: 0);
-  final TextStyle dropdownMenuItem = TextStyle(color: Colors.black, fontSize: 18);
-  late String _publish="Y";
-  @override
+  late String _publish="N";
+   @override
   void initState() {
     _s=TextEditingController();
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey, _s.text,_publish);
-    });
+    });    
     super.initState();
   }
-  Future<void> _fetchPage(int pageKey,_s,_publish) async {
+  Future<void> _fetchPage(int pageKey, _s,_publish) async {
     try {
-      final newItems = await ApiService.getPenjual(pageKey,_s,_publish);
+      final newItems = await ApiService.getKelompokPPL(pageKey, _s,_publish);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
       } else {
         final nextPageKey = pageKey + 1;
         _pagingController.appendPage(newItems, nextPageKey);
+        print(pageKey);
       }
     } catch (error) {
       _pagingController.error = error;
     }
   }
+   // The app's "state".
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Color(0xfff0f0f0),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        backgroundColor: Colors.green,
+        onPressed: (){
+         // Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: 0,)));
+        },
+      ),
+      bottomNavigationBar: buildBottomBar(3,1,3, context),
       drawer: drawerBar(context),
-      bottomNavigationBar: buildBottomBar(2,1,2, context),
-        body: SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.only(bottom: 80),
           height: MediaQuery.of(context).size.height,
@@ -67,13 +76,13 @@ class _PenjualPageState extends State<PenjualPage> {
                   onRefresh: ()=>Future.sync(
                     ()=>_pagingController.refresh()
                   ),
-                  child: PagedListView<int, Penjual>(
+                  child: PagedListView<int, Kelompok>(
                   pagingController: _pagingController,
-                  builderDelegate: PagedChildBuilderDelegate<Penjual>(
+                  builderDelegate: PagedChildBuilderDelegate<Kelompok>(
                     itemBuilder: (context, item, index) => Container(
                       child: GestureDetector(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => UpdatePenjual(penjual: item,)));
+                         // Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: item.idKomoditasDijual,)));
                         },
                         child: Container(
                         decoration: BoxDecoration(
@@ -82,73 +91,61 @@ class _PenjualPageState extends State<PenjualPage> {
                           border: Border.all(width: 1, color: item.status=='Y'?Colors.white:Colors.orange)
                         ),
                         width: double.infinity,
-                        height: 80,
+                        height: 90,
                         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         child: Column(
                             children:[ Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[ 
-                              Container(
-                                    width: 50,
-                                    height: 50,
-                                    margin: EdgeInsets.only(right: 15),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50),
-                                      border: Border.all(width: 3, color: secondary),
-                                      image: DecorationImage(
-                                          image: NetworkImage(item.foto),
-                                          fit: BoxFit.fill),
+                            children: <Widget>[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      item.namaKelompok,
+                                      style: TextStyle(
+                                          color: primary,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
                                     ),
-                                  ),                             
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        item.nama,
-                                        style: TextStyle(
-                                            color: primary,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16),
-                                      ),
-                                      SizedBox(
-                                        height: 6,
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.group,
-                                            color: secondary,
-                                            size: 15,
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text(item.noKartu,
-                                              style: TextStyle(
-                                                  color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.location_on,
-                                            color: secondary,
-                                            size: 15,
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text(item.namaKelompok+', '+item.namaDesa,
-                                              style: TextStyle(
-                                                  color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              
+                                    SizedBox(
+                                      height: 6,
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.location_on,
+                                          color: secondary,
+                                          size: 15,
+                                        ),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(item.namaDesa,
+                                            style: TextStyle(
+                                                color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                            ],
+                          ),
+                          Divider(
+                            height: 7,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.group,
+                                color: secondary,
+                                size: 15,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(item.jmlAnggota+" Anggota Aktif ",
+                                  style: TextStyle(
+                                      color: secondary, fontSize: 10, letterSpacing: .3, fontStyle: FontStyle.italic)),
                             ],
                           ),
                         ]
@@ -183,35 +180,7 @@ class _PenjualPageState extends State<PenjualPage> {
                         ),
                       ),
                       Text(
-                        "Petani",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                height: 100,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30))),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-                        icon: Icon(
-                          Icons.menu,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        "Data Petani",
+                        "Kelompok Tani",
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       PopupMenuButton(
@@ -227,10 +196,9 @@ class _PenjualPageState extends State<PenjualPage> {
                             }); 
                           },
                         itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-                          new PopupMenuItem<String>(child: const Text('Aktif'),value: 'Y'),
-                          new PopupMenuItem<String>(child: const Text('Non Aktif'),value: 'N'),
+                          new PopupMenuItem<String>(child: const Text('Publish'),value: 'Y'),
+                          new PopupMenuItem<String>(child: const Text('Draft'),value: 'N'),
                           new PopupMenuItem<String>(child: const Text('Semua'),value: 'All'),
-                          new PopupMenuItem<String>(child: const Text('Deleted'),value: 'del'),
                         ],
                       )
                     ],
@@ -256,7 +224,7 @@ class _PenjualPageState extends State<PenjualPage> {
                           cursorColor: Theme.of(context).primaryColor,
                           style: dropdownMenuItem,
                           decoration: InputDecoration(
-                              hintText: "Masukkan Nama Petani",
+                              hintText: "Masukkan Nama Kelompk",
                               hintStyle: TextStyle(
                                   color: Colors.black38, fontSize: 16),
                               prefixIcon: Material(
@@ -277,13 +245,6 @@ class _PenjualPageState extends State<PenjualPage> {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        backgroundColor: Colors.green,
-        onPressed: (){
-             Navigator.push(context, MaterialPageRoute(builder: (context) => InputPenjual()));
-        },
       ),
     );
   }

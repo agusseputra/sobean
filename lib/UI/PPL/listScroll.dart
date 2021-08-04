@@ -45,7 +45,7 @@ class _SchoolListState extends State<SchoolList> {
         child: Icon(Icons.add),
         backgroundColor: Colors.green,
         onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: 0,)));
         },
       ),
       body: SingleChildScrollView(

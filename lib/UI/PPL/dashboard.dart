@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sobean/Model/gradeKomoditas.dart';
 import 'package:sobean/Service/api.dart';
+import 'package:sobean/UI/widget/bottombar.dart';
+import 'package:sobean/UI/widget/drawer.dart';
 import 'package:sobean/UI/widget/gridproduct.dart';
 class Dashboard extends StatefulWidget {
+    static var routeName="dashboard";
     @override _HomeState createState() => _HomeState();
 }
 class _HomeState extends State<Dashboard> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  late String name='';
   // static const _pageSize = 6;
   // final PagingController<int, Panen> _pagingController = PagingController(firstPageKey: 0);
     //  DateTime time = DateTime.now();
@@ -13,8 +19,16 @@ class _HomeState extends State<Dashboard> {
     // Future<List<Komoditas>>  getData() async{
     //   return await ApiService.getKomoditas();
     // }
+    getPref() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      name = preferences.getString("name")!;
+    });
+    }
+
     @override void initState() {
         super.initState();
+        getPref();
     }
 
     var images = [
@@ -64,7 +78,9 @@ class _HomeState extends State<Dashboard> {
 
         );
       return Scaffold(
-      body: CustomScrollView(
+        key: _scaffoldKey,
+        drawer: drawerBar(context),
+        body: CustomScrollView(
         slivers: <Widget>[
           Container(
             child: SliverAppBar(
@@ -72,7 +88,7 @@ class _HomeState extends State<Dashboard> {
               backgroundColor: Colors.green,
               leading: IconButton(
                 icon: Icon(Icons.menu, color: Colors.white,),
-                onPressed: (){},
+                onPressed: () => _scaffoldKey.currentState!.openDrawer(),
               ),
               title: Text("Beranda"),
               actions: <Widget>[
@@ -85,7 +101,7 @@ class _HomeState extends State<Dashboard> {
               flexibleSpace: ListView(
                 children: <Widget>[
                   SizedBox(height: 70.0,),
-                  Text("Temukan Produk Unggulan", textAlign: TextAlign.center,style: TextStyle(
+                  Text('Selamat Datang '+name, textAlign: TextAlign.center,style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0
@@ -99,7 +115,7 @@ class _HomeState extends State<Dashboard> {
                     ),
                     child: TextField(
                       decoration: InputDecoration(
-                        hintText: "Jeruk Bali, Durian Bestala",
+                        hintText: "Temukan Produk Unggulan",
                         border: InputBorder.none,
                         icon: IconButton(onPressed: (){}, icon: Icon(Icons.search)),
                       ),
@@ -139,6 +155,7 @@ class _HomeState extends State<Dashboard> {
           ),
         ],
       ),
+      bottomNavigationBar: buildBottomBar(0,1,2, context)
     );
     }
 }
