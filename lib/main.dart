@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sobean/UI/PPL/dashboard.dart';
+import 'package:sobean/UI/PPL/dashboardnew.dart';
 import 'package:sobean/UI/PPL/home.dart';
 import 'package:sobean/UI/PPL/kelompok.dart';
 import 'package:sobean/UI/PPL/panen.dart';
@@ -13,7 +13,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
         accentColor: Colors.black,
-        cursorColor: Colors.black,
         textTheme: TextTheme(
           headline3: TextStyle(
             fontFamily: 'OpenSans',
@@ -32,7 +31,7 @@ class MyApp extends StatelessWidget {
       routes: {
         LoginScreen.routeName: (context) => LoginScreen(),
         Home.routeName: (context) => Home(),
-        Dashboard.routeName: (context) => Dashboard(),
+        DashboardThreePage.routeName: (context) => DashboardThreePage(),
         PanenPage.routeName:(context)=>PanenPage(),
         PenjualPage.routeName:(context)=>PenjualPage(),
         KelompokPage.routeName:(context)=>KelompokPage()

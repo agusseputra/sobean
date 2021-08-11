@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sobean/UI/widget/appbar.dart';
 
 class Desapage extends StatefulWidget {
   @override
@@ -10,10 +9,6 @@ class _DesapageState extends State<Desapage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(40.0),
-        child: appBar(context, "Desa"),
-      ),
       drawer: new Drawer(
         child: new ListView(
           children: <Widget>[

@@ -24,7 +24,7 @@ class _SchoolListState extends State<SchoolList> {
     print("page :");
     print(pageKey);
     try {
-      final newItems = await ApiService.getPanen(pageKey,'');
+      final newItems = await ApiService.getPanen(pageKey,'',0);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);

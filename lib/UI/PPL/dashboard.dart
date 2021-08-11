@@ -101,7 +101,7 @@ class _HomeState extends State<Dashboard> {
               flexibleSpace: ListView(
                 children: <Widget>[
                   SizedBox(height: 70.0,),
-                  Text('Selamat Datang '+name, textAlign: TextAlign.center,style: TextStyle(
+                  Text('Hai, '+name, textAlign: TextAlign.center,style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0
@@ -138,11 +138,11 @@ class _HomeState extends State<Dashboard> {
                             margin : EdgeInsets.only(left : 10, top : 10),
                             padding : EdgeInsets.only(left : 5),
                             decoration : BoxDecoration(border : Border(left : BorderSide(color : Colors.green, width : 3))),
-                            child : Text("Panen Terkini", style : TextStyle(color : Colors.black),),
+                            child : Text("Perkiraan Panen Terdekat", style : TextStyle(color : Colors.black, fontSize: 16),),
                         ),
                         Container(
                           child: FutureBuilder(
-                          future: ApiService.getPanen(1,''),
+                          future: ApiService.getPanen(1,'',0),
                           builder: (context, snapshot) {
                             if (snapshot.hasError) print(snapshot.error);
                             return snapshot.hasData ? gridProduct(snapshot.data,context): Center(child: CircularProgressIndicator());

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:sobean/Model/panen.dart';
 import 'package:sobean/Service/api.dart';
-import 'package:sobean/UI/widget/appbar.dart';
 import 'package:sobean/UI/widget/slider/image_slider.dart';
 
 class DashboardPage extends StatefulWidget {
+  static var routeName="dashboardpage";
   @override
   _DashboardPageState createState() => _DashboardPageState();
 }
@@ -70,7 +70,7 @@ class _DashboardPageState extends State<DashboardPage> {
     print("page :");
     print(pageKey);
     try {
-      final newItems = await ApiService.getPanen(pageKey,'');
+      final newItems = await ApiService.getPanen(pageKey,'',0);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -113,11 +113,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
         );
     return Scaffold(
-      appBar: PreferredSize(
-          preferredSize: Size.fromHeight(40.0),
-          child: appBar(context, "Sobean Buleleng"),
-        ),
-        drawer: new Drawer(
+      drawer: new Drawer(
           child: new ListView(
             children: <Widget>[
               new ListTile(

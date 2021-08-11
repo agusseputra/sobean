@@ -4,7 +4,6 @@ import 'package:sobean/Model/penjual.dart';
 import 'package:sobean/Service/api.dart';
 import 'package:sobean/UI/PPL/inputPenjual.dart';
 import 'package:sobean/UI/PPL/updatePenjual.dart';
-import 'package:sobean/UI/widget/appbar.dart';
 import 'package:sobean/UI/widget/bottombar.dart';
 import 'package:sobean/UI/widget/drawer.dart';
 
@@ -82,7 +81,6 @@ class _PenjualPageState extends State<PenjualPage> {
                           border: Border.all(width: 1, color: item.status=='Y'?Colors.white:Colors.orange)
                         ),
                         width: double.infinity,
-                        height: 80,
                         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         child: Column(
@@ -118,14 +116,14 @@ class _PenjualPageState extends State<PenjualPage> {
                                       Row(
                                         children: <Widget>[
                                           Icon(
-                                            Icons.group,
+                                            Icons.assignment_ind,
                                             color: secondary,
                                             size: 15,
                                           ),
                                           SizedBox(
                                             width: 5,
                                           ),
-                                          Text(item.noKartu,
+                                          Text(item.nik,
                                               style: TextStyle(
                                                   color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
                                         ],
@@ -140,9 +138,11 @@ class _PenjualPageState extends State<PenjualPage> {
                                           SizedBox(
                                             width: 5,
                                           ),
-                                          Text(item.namaKelompok+', '+item.namaDesa,
-                                              style: TextStyle(
-                                                  color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left),
+                                          Container(
+                                            width: MediaQuery.of(context).size.width*0.6,
+                                            child: Text(item.namaKelompok,
+                                                style: TextStyle(color: primary, fontSize: 12, letterSpacing: .3),textAlign: TextAlign.left, softWrap: true,),
+                                          ),
                                         ],
                                       ),
                                     ],

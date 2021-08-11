@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -53,6 +52,7 @@ class _InputPanenState extends State<InputPanen> {
           'harga':harga.text.toString(),
           'tgl_harga_berlaku':tglHargaBerlaku.text.toString(),
         }; 
+        //print(params);
       if(_isupdate){
         //print('update');
         //update
@@ -104,17 +104,17 @@ class _InputPanenState extends State<InputPanen> {
         });
   }
   void getPenjual() async {
-  final respose = await ApiService.searchPenjual('');  
+  final respose = await ApiService.getPenjualList('');  
   print(respose);
   setState(() {
         _penjual=respose.toList();
         });
   }
-  void _handleRadioValueChange1(String value) {
-    setState(() {
-      _status = value;
-    });
-  }
+  // void _handleRadioValueChange1(String value) {
+  //   setState(() {
+  //     _status = value;
+  //   });
+  // }
   @override
   void initState() {
     // TODO: implement initState
@@ -164,7 +164,7 @@ class _InputPanenState extends State<InputPanen> {
             padding: EdgeInsets.all(15),
             color: Colors.white,
             child: Form(
-              autovalidate: _validate,
+              //autovalidate: _validate,
               key: _formKey,
               child: Column(
                 children: [
@@ -192,7 +192,8 @@ class _InputPanenState extends State<InputPanen> {
                       validator: (u) => u == null ? "Wajib Diisi " : null,
                     ),
                   ),
-                  Padding(
+                  Container(
+                    //width: MediaQuery.of(context).size.width*0.6,
                     padding: const EdgeInsets.all(5),
                     child: DropdownButtonFormField(
                       hint: Text("Pilih Penjual"),
@@ -204,7 +205,7 @@ class _InputPanenState extends State<InputPanen> {
                       ),
                       items: _penjual.map((item) {
                         return DropdownMenuItem(
-                          child: Text(item.nama),
+                          child: Text(item.nama+', '+item.namaKelompok, textAlign: TextAlign.left, softWrap: true),
                           value: item.idAnggotaTani.toInt(),
                         );
                       }).toList(),

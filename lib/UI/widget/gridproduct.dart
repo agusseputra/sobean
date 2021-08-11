@@ -20,16 +20,16 @@ Widget gridProduct(data, BuildContext context) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                    child: Image.network(
-                      data[index].foto.toString(),
-                      height: 40.0,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      // width: double.infinity,
-                    ),
-                  ),
+                  // ClipRRect(
+                  //   borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                  //   child: Image.network(
+                  //     data[index].foto,
+                  //     height: 40.0,
+                  //     width: double.infinity,
+                  //     fit: BoxFit.cover,
+                  //     // width: double.infinity,
+                  //   ),
+                  // ),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(left:8.0),

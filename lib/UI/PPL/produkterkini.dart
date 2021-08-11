@@ -7,7 +7,7 @@ class ProdukTerkini extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: ApiService.getPanen(1,''),
+        future: ApiService.getPanen(1,'',0),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
           return snapshot.hasData ? gridProduct(snapshot.data,context): Center(child: CircularProgressIndicator());

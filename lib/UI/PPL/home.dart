@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sobean/UI/PPL/dashboard.dart';
-import 'package:sobean/UI/PPL/hotel.dart';
-import 'package:sobean/UI/PPL/listScroll.dart';
-import 'package:sobean/UI/PPL/panen.dart';
-import 'package:sobean/UI/PPL/penjual.dart';
+import 'package:sobean/UI/PPL/dashboardnew.dart';
 import 'package:sobean/UI/loginScreen.dart';
 
 class Home extends StatefulWidget {
@@ -43,7 +39,7 @@ class _HomeState extends State<Home>   with SingleTickerProviderStateMixin{
   Widget build(BuildContext context) {
     switch (level) {
       case 1:
-      return Dashboard();
+      return DashboardThreePage();
         // return Scaffold(
         //   drawer: new Drawer(
         //       child: new ListView(
@@ -80,7 +76,7 @@ class _HomeState extends State<Home>   with SingleTickerProviderStateMixin{
         //   ),
           
         // );
-        break;
+        //break;
       default:
       return LoginScreen();
     }

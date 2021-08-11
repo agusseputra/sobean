@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:intl/intl.dart';
 import 'package:sobean/Model/kelompok.dart';
-import 'package:sobean/Model/panen.dart';
 import 'package:sobean/Service/api.dart';
-import 'package:sobean/UI/PPL/InputPanen.dart';
+import 'package:sobean/UI/PPL/inputKelompok.dart';
 import 'package:sobean/UI/widget/bottombar.dart';
 import 'package:sobean/UI/widget/drawer.dart';
 
@@ -19,7 +17,7 @@ class _KelompokPage extends State<KelompokPage> {
   final TextStyle dropdownMenuItem = TextStyle(color: Colors.black, fontSize: 18);
   final primary = Color(0xff696b9e);
   final secondary = Color(0xfff29a94);
-  static const _pageSize = 6;
+  static const _pageSize =6;
   final PagingController<int, Kelompok> _pagingController = PagingController(firstPageKey: 0);
   late TextEditingController   _s;
   late String _publish="N";
@@ -56,7 +54,18 @@ class _KelompokPage extends State<KelompokPage> {
         child: Icon(Icons.add),
         backgroundColor: Colors.green,
         onPressed: (){
-         // Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: 0,)));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => InputKelompok(kelompok: Kelompok(
+            idKelompokTani:0,
+            idDesa:0,
+            namaKelompok:'',
+            status:'N',
+            noKartu:'',
+            idKecamatan:'',
+            kodeDesa:'',
+            namaDesa:'',
+            jmlAnggota:''
+          ),            
+          )));
         },
       ),
       bottomNavigationBar: buildBottomBar(3,1,3, context),
@@ -82,7 +91,7 @@ class _KelompokPage extends State<KelompokPage> {
                     itemBuilder: (context, item, index) => Container(
                       child: GestureDetector(
                         onTap: (){
-                         // Navigator.push(context, MaterialPageRoute(builder: (context) => InputPanen(id: item.idKomoditasDijual,)));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => InputKelompok(kelompok: item)));
                         },
                         child: Container(
                         decoration: BoxDecoration(

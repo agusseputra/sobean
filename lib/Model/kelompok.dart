@@ -3,6 +3,7 @@ class Kelompok {
         required this.idKelompokTani,
         required this.idDesa,
         required this.namaKelompok,
+        required this.noKartu,
         required this.status,
         required this.idKecamatan,
         required this.kodeDesa,
@@ -14,6 +15,7 @@ class Kelompok {
     int idDesa;
     String namaKelompok;
     String status;
+    String noKartu;
     String idKecamatan;
     String kodeDesa;
     String namaDesa;
@@ -24,6 +26,7 @@ class Kelompok {
         idDesa: json["id_desa"] as int,
         namaKelompok: json["nama_kelompok"]==null?'':json["nama_kelompok"].toString(),
         status: json["status"]==null?'':json["status"].toString(),
+        noKartu: json["nokartu"]==null?'':json["nokartu"].toString(),
         idKecamatan: json["id_kecamatan"]==null?'':json["id_kecamatan"].toString(),
         kodeDesa: json["kode_desa"]==null?'':json["kode_desa"].toString(),
         namaDesa: json["nama_desa"]==null?'':json["nama_desa"].toString(),
@@ -35,6 +38,7 @@ class Kelompok {
         "id_desa": idDesa,
         "nama_kelompok": namaKelompok,
         "status": status,
+        "nokartu": noKartu,
         "id_kecamatan": idKecamatan,
         "kode_desa": kodeDesa,
         "nama_desa": namaDesa,

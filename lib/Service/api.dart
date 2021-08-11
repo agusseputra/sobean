@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sobean/Model/desa.dart';
 import 'package:sobean/Model/errormsg.dart';
 import 'package:sobean/Model/gradeKomoditas.dart';
 import 'package:sobean/Model/kelompok.dart';
 import 'package:sobean/Model/panen.dart';
 import 'package:sobean/Model/penjual.dart';
 class ApiService {
-    static final _host = 'http://192.168.100.128/siprotani/api';
+    static final _host = 'https://www.siprotani.com/api';
     //static final _host = 'http://10.10.22.194/siprotani/api';
     static var _token="rmRIo5vSPs2lU3FQv5HdGtFLwACWXRw1ThXiN2BGBaiPKz0NBFZRWMDwgqaqSikDXSXPDyffIyGywGFY";
     Future<SharedPreferences> preferences = SharedPreferences.getInstance();
@@ -17,15 +18,16 @@ class ApiService {
       final SharedPreferences prefs = await preferences;    
       _token = prefs.getString('token') ?? "";
     }
-    static Future<List<Panen>> getPanen(int page, String _s) async {
+    static Future<List<Panen>> getPanen(int page, String _s,idKomoditas) async {
       try {  
         getPref();
-        final response = await http.get(Uri.parse('$_host/panen?page='+page.toString()+'&s='+_s),
+        final response = await http.get(Uri.parse('$_host/panen?page='+page.toString()+'&s='+_s+'&produk='+idKomoditas.toString()),
         headers: {
         'Authorization':'Bearer '+_token,
       }); 
           if (response.statusCode == 200) {
             final json = jsonDecode(response.body);
+            //print(json);
             final parsed = json['data'].cast<Map<String, dynamic>>();
             return parsed.map<Panen>((json) => Panen.fromJson(json)).toList();
             //return compute(parsePanen, response.body);          
@@ -37,8 +39,9 @@ class ApiService {
         }
     }
     static Future<List<PanenList>> getPanenPPL(int page, String _s,String _selectedChoice) async {
-      print(_selectedChoice);
+      //print(_selectedChoice);
       try {  
+        //getPref();
         final response = await http.get(Uri.parse('$_host/produklist?page='+page.toString()+'&s='+_s+'&publish='+_selectedChoice),
         headers: {
         'Authorization':'Bearer '+_token,
@@ -55,14 +58,16 @@ class ApiService {
           return [];
         }
     }
-    static Future<List<Kelompok>> getKelompokPPL(int page, String _s,String _selectedChoice) async {
+    static Future<List<Kelompok>> getKelompokPPL(int page, String _s,String _selectedChoice) async {      
       try {  
+        //getPref();
         final response = await http.get(Uri.parse('$_host/kelompok?page='+page.toString()+'&s='+_s+'&active='+_selectedChoice),
         headers: {
         'Authorization':'Bearer '+_token,
-        }); 
+        });  
           if (response.statusCode == 200) {
             final json = jsonDecode(response.body);
+            //print(json);
             final parsed = json['data'].cast<Map<String, dynamic>>();
             return parsed.map<Kelompok>((json) => Kelompok.fromJson(json)).toList();
             //return compute(parsePanen, response.body);          
@@ -75,6 +80,7 @@ class ApiService {
     }
     static Future<List<Kelompok>> getKelompokList() async {
       try {  
+        //getPref();
         final response = await http.get(Uri.parse('$_host/kelompok_list'),
         headers: {
         'Authorization':'Bearer '+_token,
@@ -138,6 +144,7 @@ class ApiService {
          return [];
         }
     }
+    
     static Future<List<Penjual>> getPenjual(int page, String _s,String _selectedChoice) async {
         try {  
         final response = await http.get(Uri.parse('$_host/penjual?page='+page.toString()+'&s='+_s+'&active='+_selectedChoice),
@@ -147,6 +154,23 @@ class ApiService {
           if (response.statusCode == 200) {
             final json = jsonDecode(response.body);
             final parsed = json['data'].cast<Map<String, dynamic>>();
+            return parsed.map<Penjual>((json) => Penjual.fromJson(json)).toList();
+            } else {
+            return [];
+          }
+        } catch (e) {
+         return [];
+        }
+    }
+    static Future<List<Penjual>> getPenjualList(_s) async {
+        try {  
+        final response = await http.get(Uri.parse('$_host/penjuallist?s='+_s),
+        headers: {
+          'Authorization':'Bearer '+_token,
+        }); 
+          if (response.statusCode == 200) {
+            final json = jsonDecode(response.body);
+            final parsed = json.cast<Map<String, dynamic>>();
             return parsed.map<Penjual>((json) => Penjual.fromJson(json)).toList();
             } else {
             return [];
@@ -189,27 +213,70 @@ class ApiService {
          return [];
         }
     }
-  //   static Future<ErrorMSG> savePenjual(_post) async {
-  //     //print(_post);
-  //   try {
-  //     final response = await http.post(Uri.parse('$_host/penjual'), body: _post,
-  //     headers: {
-  //         'Authorization':'Bearer '+_token,
-  //       });
-  //     if (response.statusCode == 200) {
-  //         return ErrorMSG.fromJson(jsonDecode(response.body));
-  //       } else {          
-  //         //var res=jsonDecode(response.body);
-  //         return ErrorMSG(success: false,message: 'Err, periksan kembali inputan anda',code:'');
-  //       }
-        
-  //   } catch (e) {
-  //     ErrorMSG responseRequest = ErrorMSG(success: false,message: 'error caught: $e',code:'');
-  //     return responseRequest;
-  //   }
+    static Future<List<Desa>> getDesa() async {
+        try {  
+        final response = await http.get(Uri.parse('$_host/desa?'),
+        headers: {
+          'Authorization':'Bearer '+_token,
+        }); 
+          if (response.statusCode == 200) {
+            final json = jsonDecode(response.body);
+            final parsed = json.cast<Map<String, dynamic>>();
+            return parsed.map<Desa>((json) => Desa.fromJson(json)).toList();
+            } else {
+            return [];
+          }
+        } catch (e) {
+         return [];
+        }
+    }
     
-  // }
-
+    static Future<ErrorMSG> saveKelompok(_post) async {
+    try {
+      final response = await http.post(Uri.parse('$_host/kelompok'), body: _post,
+      headers: {
+          'Authorization':'Bearer '+_token,
+        });
+      if (response.statusCode == 200) {
+          return ErrorMSG.fromJson(jsonDecode(response.body));
+        } else {          
+          return ErrorMSG(success: false,message: 'Err, periksan kembali inputan anda',code:'');
+        }
+        
+    } catch (e) {
+      ErrorMSG responseRequest = ErrorMSG(success: false,message: 'error caught: $e',code:'');
+      return responseRequest;
+    }
+    
+  }
+// static Future<ErrorMSG> saveKelompoks(_panen) async {
+//     try {
+//       var request = http.MultipartRequest('POST', Uri.parse('$_host/kelompok'));
+//       request.fields['id_desa']=_panen['id_desa'];
+//       request.fields['nama_kelompok']=_panen['nama_kelompok'];
+//       request.fields['nokartu']=_panen['nokartu'];
+//       request.fields['status']=_panen['status'];
+//       request.headers.addAll(
+//         {
+//           'Authorization':'Bearer '+_token,
+//         }
+//       );
+//       var response = await request.send();
+//       //final response = await http.post(Uri.parse('$_host/panen'), body:_panen);
+//       if (response.statusCode == 200) {
+//           //return ErrorMSG.fromJson(jsonDecode(response.body));
+//           final respStr = await response.stream.bytesToString();
+//           return ErrorMSG.fromJson(jsonDecode(respStr));
+//         } else {
+//           //return ErrorMSG.fromJson(jsonDecode(response.body));
+//           return ErrorMSG(success: false,message: 'err Request',code:'');
+//         }
+//     } catch (e) {
+//       ErrorMSG responseRequest = ErrorMSG(success: false,message: 'error caught: $e',code:'');
+//       return responseRequest;
+//     }
+    
+//   }
     static Future<ErrorMSG> savePenjual(_panen, filepath) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse('$_host/penjual'));
@@ -268,7 +335,9 @@ class ApiService {
           return ErrorMSG.fromJson(jsonDecode(respStr));
         } else {
           //return ErrorMSG.fromJson(jsonDecode(response.body));
-          return ErrorMSG(success: false,message: 'err Request',code:'');
+          final respStr = await response.stream.bytesToString();
+          return ErrorMSG.fromJson(jsonDecode(respStr));
+          //return ErrorMSG(success: false,message: 'err Request',code:'');
         }
     } catch (e) {
       ErrorMSG responseRequest = ErrorMSG(success: false,message: 'error caught: $e',code:'');
@@ -278,6 +347,7 @@ class ApiService {
   }
   static Future<ErrorMSG> savePanen(_panen, id, filepath) async {
     try {
+      
       var request = http.MultipartRequest('POST', Uri.parse('$_host/panen'));
       if(id!=0){
         request.fields['id_komoditas_dijual']=_panen['id_komoditas_dijual'];
@@ -293,6 +363,7 @@ class ApiService {
       request.fields['publish']=_panen['publish'];
       request.fields['harga']=_panen['harga'];
       request.fields['tgl_harga_berlaku']=_panen['tgl_harga_berlaku'];
+      //print(request);
       if(filepath!=''){
         request.files.add(await http.MultipartFile.fromPath('image', filepath));
       }
@@ -302,13 +373,17 @@ class ApiService {
         }
       );
       var response = await request.send();
+      
       //final response = await http.post(Uri.parse('$_host/panen'), body:_panen);
       if (response.statusCode == 200) {
           //return ErrorMSG.fromJson(jsonDecode(response.body));
-          return ErrorMSG(success: true,message:"success",code: "00" );
+          //return ErrorMSG(success: true,message:"success",code: "00" );
+          final respStr = await response.stream.bytesToString();
+          return ErrorMSG.fromJson(jsonDecode(respStr));
         } else {
           //return ErrorMSG.fromJson(jsonDecode(response.body));
-          return ErrorMSG(success: false,message: 'err 200',code:'');
+          final respStr = await response.stream.bytesToString();
+          return ErrorMSG.fromJson(jsonDecode(respStr));
         }
     } catch (e) {
       ErrorMSG responseRequest = ErrorMSG(success: false,message: 'error caught: $e',code:'');

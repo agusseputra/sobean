@@ -3,11 +3,9 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:sobean/Model/errormsg.dart';
 import 'package:sobean/Model/kelompok.dart';
-import 'package:sobean/Model/penjual.dart';
 import 'package:sobean/Service/api.dart';
 
 class InputPenjual extends StatefulWidget {
@@ -19,11 +17,11 @@ class _InputPenjualState extends State<InputPenjual> {
   final _formPenjualanKey=GlobalKey<FormState>();
   bool _validate=false;
   bool _isupdate=false;
-  late int _idPenjual;
+  //late int _idPenjual;
   late ErrorMSG response;
   late bool _success=false;
   late TextEditingController   nama, nik, alamat, telp, noKartu, email, password;
-  late List  idKelompokTani=[];
+  //late List  idKelompokTani=[];
   late List<Kelompok> _kelompok=[];
   late List _selectedItem=[];
   late String _imagePath="";
@@ -101,7 +99,7 @@ class _InputPenjualState extends State<InputPenjual> {
                       controller: nama,
                       validator: (u) => u == "" ? "Wajib Diisi " : null,
                       decoration: const InputDecoration(
-                        icon: Icon(Icons.verified_user_sharp),
+                        icon: Icon(Icons.perm_identity),
                         hintText: 'Nama Petani',
                         labelText: 'Nama Petani',
                       ),
@@ -113,7 +111,7 @@ class _InputPenjualState extends State<InputPenjual> {
                       controller: nik,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        icon: Icon(Icons.confirmation_number),
+                        icon: Icon(Icons.assignment_ind),
                         hintText: 'NIK',
                         labelText: 'NIK Petani',
                       ),

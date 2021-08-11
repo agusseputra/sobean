@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:sobean/Model/errormsg.dart';
 import 'package:sobean/Model/kelompok.dart';
@@ -24,7 +23,7 @@ class _UpdatePenjualState extends State<UpdatePenjual> {
   late ErrorMSG response;
   late bool _success=false;
   late TextEditingController   nama, nik, alamat, telp;
-  late List  idKelompokTani=[];
+  //late List  idKelompokTani=[];
   late List<Kelompok> _kelompok=[];
   late List _selectedItem=[];
   late String _imagePath="";
@@ -98,7 +97,7 @@ class _UpdatePenjualState extends State<UpdatePenjual> {
           padding: EdgeInsets.all(15),
             color: Colors.white,
             child: Form(
-              autovalidate: _validate,
+              //autovalidate: _validate,
               key: _formPenjualanKey,
               child: Column(
                   children: [
@@ -108,7 +107,7 @@ class _UpdatePenjualState extends State<UpdatePenjual> {
                       controller: nama,
                       validator: (u) => u == "" ? "Wajib Diisi " : null,
                       decoration: const InputDecoration(
-                        icon: Icon(Icons.verified_user_sharp),
+                        icon: Icon(Icons.perm_identity),
                         hintText: 'Nama Petani',
                         labelText: 'Nama Petani',
                       ),
